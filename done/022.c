@@ -10,7 +10,7 @@ void display(char array[][30], int x){
 }
 
 int main(){
-    FILE* p_datei = fopen("022_names.txt", "rt");
+    FILE* p_datei = fopen("resources/022_names.txt", "rt");
     if(p_datei == NULL) return -1;
     char buffer[50000];
     int no = fread(buffer, sizeof(char), 50000, p_datei);
