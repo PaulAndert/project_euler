@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 mod foo {
-    include!("042.rs");
+    include!("044.rs");
 }
 
 fn main() {
