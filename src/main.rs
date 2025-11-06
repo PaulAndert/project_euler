@@ -1,11 +1,12 @@
 use std::time::Instant;
 
-mod foo {
-    include!("060.rs");
-}
+mod done;
+mod progress;
+
+use progress::p062;
 
 fn main() {
     let now = Instant::now();
-    foo::main();
+    p062::main();
     println!("Elapsed: {:.2?}", now.elapsed());
 }
