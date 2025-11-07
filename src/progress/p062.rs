@@ -1,152 +1,104 @@
 use std::collections::HashMap;
-use itertools::Itertools;
-use std::time::Instant;
+
+// Elapsed: 13.15s
 
 pub fn main() {
-    let start = Instant::now();
-
-
-    // n^3 - n
-    // -> precompute the hashset with valid numbers for n < 10.000
+        // n^3 - n
     let mut known_cubes: HashMap<u64, u64> = HashMap::new();
-    let mut all_results: Vec<u64> = Vec::new();
-    let mut results: Vec<u64>;
+    let mut matched_n_perfect_cubes: Vec<u64> = Vec::new();
 
-    let mut two: usize = 0;
-    let mut three: usize = 0;
-    let mut four: usize = 0;
-
-    for index in 10u64..=10000 {
-        let cubed: u64 = index.pow(3);
-        known_cubes.insert(cubed, index);
+    for input_n in 10u64..=10_000 {
+        let input_n3: u64 = input_n.pow(3);
+        known_cubes.insert(input_n3, input_n);
     }
 
-    println!("Precomputed: {:.2?}", start.elapsed());
-
-    for index in 10u64..=500 {
-        if all_results.contains(&index) {
+    for input_n in 10u64..=10_000 {
+        if matched_n_perfect_cubes.contains(&input_n) {
             continue;
-        }   
-        (known_cubes, results) = check_permutations(known_cubes, index);
-        if results.len() == 2 {
-            two += 1;
-        } else if results.len() == 3 {
-            three += 1;
-        } else if results.len() == 4 {
-            four += 1;
-        } else if results.len() == 5 {
-            println!("FINISHED {:?}", results);
-            break;
+        }
+            
+        let input_n3: u64 = input_n.pow(3);
+        let mut results: Vec<u64> = Vec::new();
+
+        let counter = get_number_length(input_n3);
+        let lower_range_of_length = 10u64.pow((counter - 1) as u32);
+        let upper_range_of_length = 10u64.pow(counter as u32);
+        
+        let cubes_with_same_length: HashMap<u64, u64> = known_cubes
+            .iter()
+            .filter(|(&k, _)| k >= lower_range_of_length && k < upper_range_of_length)
+            .map(|(&k, &v)| (k, v))
+            .collect();
+        
+        for (output_n3, output_n) in cubes_with_same_length {
+            if is_permutation(input_n3, output_n3) {
+                results.push(output_n);
+            }
+        }
+
+        if results.len() == 5 {
+            results.sort();
+            match results.get(0) {
+                Some(min) => { println!("FINISHED {:?} -> {}", results, min.pow(3)); },
+                None => { println!("Error in {:?}", results); }
+            }
+            return;
         }
 
         for i in results {
-            if !all_results.contains(&i) {
-                all_results.push(i);
+            if !matched_n_perfect_cubes.contains(&i) {
+                matched_n_perfect_cubes.push(i);
             }
         }
     }
-
-
-    println!("2: {}", two);
-    println!("3: {}", three);
-    println!("4: {}", four);
 }
 
 
-fn check_permutations(known_cubes: HashMap<u64, u64>, index: u64) -> (HashMap<u64, u64>, Vec<u64>){
-    let cubed: u64 = index.pow(3);
-    let mut results: Vec<u64> = Vec::new();
+fn is_permutation(n3_01: u64, n3_02: u64) -> bool {
 
-    for permut in get_permutations(cubed) {
-        match known_cubes.get(&permut) {
-            Some(known_base) => {
-                if known_base > &0u64 {
-                    results.push(*known_base);
-                }
-            },
-            None => {}
-        }
-    }
-    return (known_cubes, results);
-}
+    let mut numbers_01: Vec<usize> = vec![0;10];
+    let mut numbers_02: Vec<usize> = vec![0;10];
 
-fn get_permutations(num: u64) -> Vec<u64> {
-    let options: Vec<u64> = get_options(num);
-    let mut ret: Vec<u64> = Vec::new();
+    let options_01: Vec<usize> = get_options(n3_01);
+    let options_02: Vec<usize> = get_options(n3_02);
 
-    for perm in options.iter().permutations(options.len()).unique() {
-        if *perm[0] != 0 {
-            let perm_u64: u64 = vec_to_u64(perm);
-            ret.push(perm_u64);
-        }
+    if options_01.len() != options_02.len() {
+        return false;
     }
 
-    return ret;
+    for opt in options_01 {
+        numbers_01[opt] += 1;
+    }
+
+    for opt in options_02 {
+        if numbers_01[opt] == 0 {
+            return false;
+        }
+        numbers_02[opt] += 1;
+    }
+
+    for i in 0..10 {
+        if numbers_01.get(i) != numbers_02.get(i) {
+            return false;
+        }
+    }
+    return true;
 }
 
-fn get_options(mut num: u64) -> Vec<u64> {
-    let mut ret: Vec<u64> = Vec::new();
+fn get_options(mut num: u64) -> Vec<usize> {
+    let mut ret: Vec<usize> = Vec::new();
     while num > 0 {
-        ret.push(num % 10);
+        ret.push((num % 10) as usize);
         num /= 10;
     }
     return ret;
 }
 
-fn vec_to_u64(perm: Vec<&u64>) -> u64 {
-    let mut val: u64 = 0;
-    for i in 0..perm.len() {
-        val += perm[perm.len() - (i + 1)] * u64::pow(10, i as u32);
+fn get_number_length(num: u64) -> usize {
+    if num == 0 {
+        return 1;
+    } else {
+        return num.ilog10() as usize + 1;
     }
-    return val;
-}
-    
-
-
-fn cbrt(n: u64) -> u64 {
-    if n == 0 { return 0; }
-
-    let mut low = 0u64;
-    let mut high = n;
-    let mut ans = 0;
-
-    while low <= high {
-        let mid = low + (high - low) / 2;
-        let mid_cubed = mid.saturating_mul(mid).saturating_mul(mid); // schützt vor Overflow
-
-        if mid_cubed == n {
-            return mid;
-        } else if mid_cubed < n {
-            ans = mid;
-            low = mid + 1;
-        } else {
-            high = mid - 1;
-        }
-    }
-
-    ans
 }
 
-fn is_perfect_cube(n: u64) -> bool {
-    if n == 0 || n == 1 {
-        return true;
-    }
-
-    let mut low = 1u64;
-    let mut high = n;
-
-    while low <= high {
-        let mid = low + (high - low) / 2;
-        let mid_cubed = mid.saturating_mul(mid).saturating_mul(mid);
-
-        if mid_cubed == n {
-            return true; // n ist eine perfekte Kubikzahl
-        } else if mid_cubed < n {
-            low = mid + 1;
-        } else {
-            high = mid - 1;
-        }
-    }
-
-    false
-}
