@@ -1,9 +1,14 @@
 use std::collections::HashMap;
 
+// The only valid Permutations of any n3, are ones that come from other cube roots n, so one first computates a number of n -> n3
+// after that you can look up if there are permutations of a given cube in the precomputed hashmap
+// to reduce computation you can only look at cubes wih the same length
+// to quickly check if two numbers are a permutation of eachother, just count each number occurence and then compare the findings
+
 // Elapsed: 13.15s
 
 pub fn main() {
-        // n^3 - n
+    // n^3 - n
     let mut known_cubes: HashMap<u64, u64> = HashMap::new();
     let mut matched_n_perfect_cubes: Vec<u64> = Vec::new();
 
