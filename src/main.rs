@@ -3,10 +3,10 @@ use std::time::Instant;
 // mod done;
 mod progress;
 
-// use progress::p065;
+use progress::p064;
 
 fn main() {
     let now = Instant::now();
-    // p065::main();
+    p064::main();
     println!("Elapsed: {:.2?}", now.elapsed());
 }
