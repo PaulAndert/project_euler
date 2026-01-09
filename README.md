@@ -1,7 +1,11 @@
-# project euler
+# Project Euler Solutions
 
-these are solutions to some of the [projecteuler.net](https://projecteuler.net) problems implemented in C or Rust
+Collection of solutions to some [Project Euler](https://projecteuler.net) problems.
 
-all files in the src/done directory are problems that are fully solved  
+## Tech Stack
+- C (legacy, first ~25 problems)
+- Rust (all subsequent problems)
 
-all files in the src/progress directory are work in progress
+## Structure
+- `src/done/` - fully solved problems
+- `src/progress/` - problems in progress
